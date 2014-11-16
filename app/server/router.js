@@ -6,9 +6,25 @@ module.exports = function(app) {
 	app.post('/', function(req, res){
 		res.redirect('/home');
 	});
-
+	app.get('/login', function(req, res){
+		res.render('login');
+	});	
+	app.post('/login', function(req, res){
+		//log(req.param('user'));
+		manualLogin(req, res, function() {
+			if (req.session.user == null) {
+				res.redirect('/login');
+			} else {
+				res.render('home');
+			}
+		});
+	});
 	app.get('/home', function(req, res) {
-	    res.render('home');
+		if (req.session.user == null) {
+			res.render('login');
+		} else {
+			res.render('home');
+		}	    
 	});
 	app.post('/home', function(req, res) {
 	    res.render('home');
@@ -57,6 +73,13 @@ function debugHeaders(req) {
     sys.puts(key + ': ' + req.headers[key]);
   }
   sys.puts('\n\n');
+}
+
+function manualLogin(req, res, callback) {
+	if (req.param('user')) {
+		req.session.user = {user: req.param('user')};
+	}
+	callback();
 }
 
 var log = function(str) {

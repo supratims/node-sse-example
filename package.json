@@ -12,7 +12,8 @@
 		"stylus": "0.31.0",
 		"jade": "0.27.7",
 		"mongodb": "1.2.7",
-		"moment" : "1.7.2"
+		"moment" : "1.7.2",
+		"kaiseki": "*"
 	},
 	"engines": {
 		"node": "0.8.14",

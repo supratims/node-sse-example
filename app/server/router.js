@@ -27,9 +27,12 @@ module.exports = function(app) {
 	});
 	app.post('/system', function(req, res) {
 		if (req.param('message')) {
-			chatservice.sendMessage('lucy', req.param('message'));
+			chatservice.sendMessage({username: 'lucy'}, req.param('message'), function(msg) {
+				res.render('system', {message: 'Message Sent !'});
+			});
+		} else {
+			res.render('system');
 		}
-		res.render('system');
 	});
 	app.get('/stream', function(req, res) {
 	  if (req.headers.accept && req.headers.accept == 'text/event-stream') {
@@ -54,27 +57,14 @@ function sendChats(req, res) {
   });
   var id = (new Date()).toLocaleTimeString();
   setInterval(function() {
-    constructSSE(res, id, chatservice.getMessage(req.session.user));
+    chatservice.getMessage(req.session.user, function(msg) {
+		constructSSE(res, id,  msg ? msg.message : null);
+    })
   }, 3000);
 
-  constructSSE(res, id, chatservice.getMessage(req.session.user));
-}
-
-function sendServerTimeAsSSE(req, res) {
-  res.writeHead(200, {
-    'Content-Type': 'text/event-stream',
-    'Cache-Control': 'no-cache',
-    'Connection': 'keep-alive'
-  });
-
-  var id = (new Date()).toLocaleTimeString();
-
-  // Sends a SSE every 5 seconds on a single connection.
-  setInterval(function() {
-    constructSSE(res, id, (new Date()).toLocaleTimeString());
-  }, 5000);
-
-  constructSSE(res, id, (new Date()).toLocaleTimeString());
+  chatservice.getMessage(req.session.user, function(msg) {
+      constructSSE(res, id, msg ? msg.message : null);
+  })
 }
 
 function constructSSE(res, id, data) {
@@ -82,14 +72,6 @@ function constructSSE(res, id, data) {
 	  res.write('id: ' + id + '\n');
 	  res.write("data: " + data + '\n\n');
   }
-}
-
-function debugHeaders(req) {
-  sys.puts('URL: ' + req.url);
-  for (var key in req.headers) {
-    sys.puts(key + ': ' + req.headers[key]);
-  }
-  sys.puts('\n\n');
 }
 
 function doLogin(req, res, callback) {
@@ -112,4 +94,28 @@ var log = function(str) {
 	DEBUG && console && console.log('[ROUTER]: %j', str);
 };
 
+/*
+function sendServerTimeAsSSE(req, res) {
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    'Connection': 'keep-alive'
+  });
 
+  var id = (new Date()).toLocaleTimeString();
+
+  // Sends a SSE every 5 seconds on a single connection.
+  setInterval(function() {
+    constructSSE(res, id, (new Date()).toLocaleTimeString());
+  }, 5000);
+
+  constructSSE(res, id, (new Date()).toLocaleTimeString());
+}
+*/
+function debugHeaders(req) {
+  sys.puts('URL: ' + req.url);
+  for (var key in req.headers) {
+    sys.puts(key + ': ' + req.headers[key]);
+  }
+  sys.puts('\n\n');
+}

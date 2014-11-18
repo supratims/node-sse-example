@@ -1,6 +1,6 @@
 module.exports = function(app) {
 	app.get('/', function(req, res){
-		res.render('home');
+		requiresLogin(req, res);
 	});
 
 	app.post('/', function(req, res){
@@ -8,32 +8,24 @@ module.exports = function(app) {
 	});
 	app.get('/login', function(req, res){
 		res.render('login');
-	});	
+	});
 	app.post('/login', function(req, res){
 		//log(req.param('user'));
-		manualLogin(req, res, function() {
-			if (req.session.user == null) {
-				res.redirect('/login');
-			} else {
-				res.render('home');
-			}
+		doLogin(req, res, function() {
+			requiresLogin(req, res);
 		});
 	});
 	app.get('/home', function(req, res) {
-		if (req.session.user == null) {
-			res.render('login');
-		} else {
-			res.render('home');
-		}	    
+		requiresLogin(req, res);
 	});
 	app.post('/home', function(req, res) {
 	    res.render('home');
 	});
 
 	app.get('/stream', function(req, res) {
-	  if (req.headers.accept && req.headers.accept == 'text/event-stream') {	    
+	  if (req.headers.accept && req.headers.accept == 'text/event-stream') {
 	      sendSSE(req, res);
-	  } 	    
+	  }
 	});
 
 	app.get('/logout', function(req, res) {
@@ -75,11 +67,19 @@ function debugHeaders(req) {
   sys.puts('\n\n');
 }
 
-function manualLogin(req, res, callback) {
+function doLogin(req, res, callback) {
 	if (req.param('user')) {
-		req.session.user = {user: req.param('user')};
+		req.session.user = {username: req.param('user')};
 	}
 	callback();
+}
+
+function requiresLogin(req, res) {
+	if (req.session.user == null) {
+		res.redirect('/login');
+	} else {
+		res.render('home', { user: req.session.user });
+	}
 }
 
 var log = function(str) {

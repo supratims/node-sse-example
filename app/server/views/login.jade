@@ -4,11 +4,12 @@ title Login
 
 block content
 	div.container(style="margin-top:20px")
-		h4 Enter your name
+		h4 You must login
 		div.col-xs-12.main
 			form(method='POST')
-				input(type='text', name='user')#username
-				input(type='submit', value='Login').btn.btn-primary#login
+				label.item.item-input
+					input(type='text', name='user')#username
+				button.button.button-positive#login Login
 block scripts
 	include scripts
 	script(src='/login.js')

@@ -2,11 +2,12 @@
 extends layout
 
 title Home
-
+block navbar
+	include navbar
 block content
 	div.container(style="margin-top:40px")
 		h3 Welcome, #{user.username}
-		div.col-xs-12.main
+		div.row.main
 block scripts
 	include scripts
 	script(src='/home.js')

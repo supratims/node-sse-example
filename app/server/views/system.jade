@@ -1,0 +1,18 @@
+- user = typeof(user) != 'undefined' ? user : { }
+extends layout
+
+title System
+
+block navbar
+	include navbar
+block content
+	div.container(style="margin-top:40px")
+		h3 System : Select a user and send message
+		div.row.main
+			form(method='POST')
+				label.item.item-input
+					input(type='text', name='message')#message
+				button.button.button-positive#send Send
+block scripts
+	include scripts
+	script(src='/system.js')

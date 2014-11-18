@@ -1,3 +1,4 @@
+var chatservice = require('./chatservice.js');
 module.exports = function(app) {
 	app.get('/', function(req, res){
 		requiresLogin(req, res);
@@ -21,10 +22,18 @@ module.exports = function(app) {
 	app.post('/home', function(req, res) {
 	    res.render('home');
 	});
-
+	app.get('/system', function(req, res) {
+		res.render('system');
+	});
+	app.post('/system', function(req, res) {
+		if (req.param('message')) {
+			chatservice.sendMessage('lucy', req.param('message'));
+		}
+		res.render('system');
+	});
 	app.get('/stream', function(req, res) {
 	  if (req.headers.accept && req.headers.accept == 'text/event-stream') {
-	      sendSSE(req, res);
+	      sendChats(req, res);
 	  }
 	});
 
@@ -37,7 +46,21 @@ module.exports = function(app) {
 
 };
 
-function sendSSE(req, res) {
+function sendChats(req, res) {
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    'Connection': 'keep-alive'
+  });
+  var id = (new Date()).toLocaleTimeString();
+  setInterval(function() {
+    constructSSE(res, id, chatservice.getMessage(req.session.user));
+  }, 3000);
+
+  constructSSE(res, id, chatservice.getMessage(req.session.user));
+}
+
+function sendServerTimeAsSSE(req, res) {
   res.writeHead(200, {
     'Content-Type': 'text/event-stream',
     'Cache-Control': 'no-cache',
@@ -55,8 +78,10 @@ function sendSSE(req, res) {
 }
 
 function constructSSE(res, id, data) {
-  res.write('id: ' + id + '\n');
-  res.write("data: " + data + '\n\n');
+  if (data != null) {
+	  res.write('id: ' + id + '\n');
+	  res.write("data: " + data + '\n\n');
+  }
 }
 
 function debugHeaders(req) {

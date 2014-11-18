@@ -1,7 +1,7 @@
 {
-	"name": "node-skeleton",
+	"name": "node-sse-example",
 	"version": "1.0.1",
-	"description": "Node quickstart project, a bootstrap/skeketon for any project to start working on a nodejs",
+	"description": "Node Project to showcase html5 server sent events.",
 	"author": {
 		"name": "Supratim",
 		"email": "supratims@gmail.com"
